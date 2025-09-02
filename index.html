@@ -1,21 +1,40 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Panel del Socio</title>
-    <link rel="stylesheet" href="../landing_page/css/estilos.css" />
-  <script defer src="js/app.js"></script>
+  <link rel="stylesheet" href="../landing_page/css/estilos.css" />
+  <style>
+    /* Sólo lo justo para el layout del panel (usa tu paleta) */
+    .dashboard { display: grid; grid-template-columns: 260px 1fr; gap: 2rem; margin: 2rem 0; }
+    .sidebar { background:#232329; color:#E0E0E0; padding:1rem 1.25rem; border-radius:8px; }
+    .sidebar h3 { margin: .75rem 0 .4rem; color:#34D399; font-size:1rem; }
+    .sidebar a { display:block; text-decoration:none; color:#E0E0E0; padding:.4rem 0; opacity:.9; }
+    .sidebar a:hover { opacity:1; }
+
+    .content { display: grid; gap: 1.25rem; }
+    .grid2 { display:grid; grid-template-columns: repeat(2, minmax(220px,1fr)); gap:1.25rem; }
+    .card { background:#0f1115; color:#E0E0E0; }
+    .card h4 { margin-bottom:.5rem; color:#CDB686; }
+    .actions .card { display:flex; align-items:center; justify-content:center; min-height:160px; cursor:pointer; transition:transform .12s; }
+    .actions .card:hover { transform: translateY(-2px); }
+    .muted { color:#A0AEC0; font-size:.95rem; }
+    .hours-list { list-style:none; padding-left:0; margin: .5rem 0 0 0; }
+    .hours-list li { padding:.45rem 0; border-bottom:1px solid #1e2530; }
+    .tag { display:inline-block; background:#12766a; color:#E0E0E0; padding:.15rem .5rem; border-radius:4px; font-size:.8rem; margin-left:.5rem; }
+    .topbar-user { font-size:.95rem; color:#E0E0E0; }
+  </style>
 </head>
 <body>
   <header>
     <div class="container">
-      <a href="#" id="logo">Panel del Socio</a>
+      <a id="logo" href="./index.html">Panel del Socio</a>
       <nav>
         <ul>
-          <li><a class="active" href="index.html">Inicio</a></li>
-          <li><a href="horas.html">Cargar Horas</a></li>
-          <li><a href="comprobantes.html">Subir Comprobantes</a></li>
+          <li><a class="active" href="./index.html">Inicio</a></li>
+          <li><a href="./horas.html">Cargar Horas</a></li>
+          <li><a href="./comprobantes.html">Subir Comprobantes</a></li>
           <li><a id="logout" href="#">Salir</a></li>
         </ul>
       </nav>
@@ -23,18 +42,60 @@
   </header>
 
   <main class="container">
-    <h1>Bienvenido/a</h1>
-    <p>Desde aquí podrás registrar tus horas y subir comprobantes.</p>
-    <section class="form-cliente">
-      <h3>Mis últimas horas</h3>
-      <div id="ultimasHoras"></div>
-    </section>
+    <div style="margin:1.25rem 0 .25rem; display:flex; justify-content:space-between; align-items:center;">
+      <h1 style="color:#2C3E50;">Bienvenido/a</h1>
+      <span class="topbar-user" id="topbarUser">…</span>
+    </div>
+
+    <div class="dashboard">
+      <aside class="sidebar">
+        <h3>Datos personales</h3>
+        <a href="#" aria-disabled="true">Mis datos (próx.)</a>
+        <a href="#" aria-disabled="true">Cargar aportes (próx.)</a>
+        <a href="#" aria-disabled="true">Historial de pagos (próx.)</a>
+        <a href="#" aria-disabled="true">Estado de cuenta (próx.)</a>
+
+        <h3 style="margin-top:1rem;">Obra</h3>
+        <a href="#" aria-disabled="true">Datos de unidad (próx.)</a>
+        <a href="./horas.html">Registro de horas</a>
+        <a href="#" aria-disabled="true">Datos de la obra (próx.)</a>
+
+        <h3 style="margin-top:1rem;">Administración</h3>
+        <a href="#" aria-disabled="true">Actas de asamblea (próx.)</a>
+        <a href="#" aria-disabled="true">Calendario (próx.)</a>
+        <a href="#" aria-disabled="true">Reportes (próx.)</a>
+      </aside>
+
+      <section class="content">
+        <div class="grid2 actions">
+          <a class="card" href="./comprobantes.html"><h4>SUBIR COMPROBANTES</h4></a>
+          <a class="card" href="./horas.html"><h4>CARGAR HORAS</h4></a>
+        </div>
+
+        <div class="grid2">
+          <div class="card" style="padding:1.25rem;">
+            <h4>NOVEDADES</h4>
+            <p class="muted">Aquí verás comunicaciones de la cooperativa. (Próxima iteración)</p>
+          </div>
+
+          <div class="card" style="padding:1.25rem;">
+            <h4>Mis últimas horas</h4>
+            <div id="hoursState" class="muted">Cargando…</div>
+            <ul id="hoursList" class="hours-list"></ul>
+            <div id="hoursSummary" class="muted" style="margin-top:.5rem;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
 
   <footer>
     <div class="container">
-      <p>&copy; 2025 ZYBER S.A.S. Todos los derechos reservados.</p>
+      <p>© 2025 ZYBER S.A.S. Todos los derechos reservados.</p>
     </div>
   </footer>
+
+  <script src="./js/app.js"></script>
+  <script>window.Panel.initDashboard();</script>
 </body>
 </html>

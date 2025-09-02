@@ -1,21 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cargar Horas</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cargar horas</title>
   <link rel="stylesheet" href="../landing_page/css/estilos.css" />
-  <script defer src="js/app.js"></script>
 </head>
 <body>
   <header>
     <div class="container">
-      <a href="#" id="logo">Panel del Socio</a>
+      <a id="logo" href="./index.html">Panel del Socio</a>
       <nav>
         <ul>
-          <li><a href="index.html">Inicio</a></li>
-          <li><a class="active" href="horas.html">Cargar Horas</a></li>
-          <li><a href="comprobantes.html">Subir Comprobantes</a></li>
+          <li><a href="./index.html">Inicio</a></li>
+          <li><a class="active" href="./horas.html">Cargar Horas</a></li>
+          <li><a href="./comprobantes.html">Subir Comprobantes</a></li>
           <li><a id="logout" href="#">Salir</a></li>
         </ul>
       </nav>
@@ -23,29 +22,43 @@
   </header>
 
   <main class="container">
-    <h1>Registrar Horas</h1>
-    <form class="form-cliente" id="formHoras">
+    <h1 style="margin:1.5rem 0; color:#2C3E50;">Registro de horas</h1>
+
+    <form id="formHoras" class="form-cliente" autocomplete="off">
       <div class="form-group">
-        <label>Fecha:</label>
-        <input type="date" name="fecha" required />
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha" name="fecha" required />
       </div>
+
       <div class="form-group">
-        <label>Cantidad de horas:</label>
-        <input type="number" name="cantidad" min="1" max="24" required />
+        <label for="cantidad">Cantidad de horas</label>
+        <input type="number" id="cantidad" name="cantidad" min="1" max="24" required />
       </div>
+
       <div class="form-group">
-        <label>Descripción (opcional):</label>
-        <input type="text" name="descripcion" maxlength="255" />
+        <label for="descripcion">Actividad realizada</label>
+        <textarea id="descripcion" name="descripcion" rows="3" placeholder="Describe brevemente la tarea realizada"></textarea>
       </div>
+
       <button class="btn" type="submit">Guardar</button>
-      <p data-form-msg style="min-height:1.25rem;color:#cbd5e1"></p>
+      <span id="msgHoras" style="display:inline-block;margin-left:.75rem;color:#A0AEC0;"></span>
     </form>
+
+    <section style="margin:2rem 0;">
+      <h2 style="color:#2C3E50; margin-bottom:.75rem;">Mis últimas horas</h2>
+      <div id="hoursState" class="muted">Cargando…</div>
+      <ul id="hoursList" class="hours-list"></ul>
+      <div id="hoursSummary" class="muted" style="margin-top:.5rem;"></div>
+    </section>
   </main>
 
   <footer>
     <div class="container">
-      <p>&copy; 2025 ZYBER S.A.S. Todos los derechos reservados.</p>
+      <p>© 2025 ZYBER S.A.S. Todos los derechos reservados.</p>
     </div>
   </footer>
+
+  <script src="./js/app.js"></script>
+  <script>window.Panel.initHoras();</script>
 </body>
 </html>
