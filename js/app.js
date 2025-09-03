@@ -3,8 +3,9 @@
    Endpoints:
    - api-usuarios      -> /api/me
    - api-cooperativa   -> /api/horas/mias  (GET)
-   - api-cooperativa   -> /api/horas       (POST)  **si ya lo creaste**
-   - api-cooperativa   -> /api/comprobantes (POST) **si ya lo creaste**
+   - api-cooperativa   -> /api/horas       (POST)
+   - api-cooperativa   -> /api/comprobantes (POST)
+   - api-cooperativa   -> /api/comprobantes/mios (GET)
 */
 
 const API_USUARIOS_BASE = "http://localhost:8001";
@@ -81,18 +82,20 @@ async function loadMe() {
 // ---------- horas ----------
 function renderHoras(boxState, listEl, sumEl, horasData) {
   if (!horasData || !horasData.entradas || horasData.entradas.length === 0) {
-    boxState.textContent = "Sin datos.";
-    listEl.innerHTML = "";
-    sumEl.textContent = "";
+    if (boxState) boxState.textContent = "Sin datos.";
+    if (listEl) listEl.innerHTML = "";
+    if (sumEl) sumEl.textContent = "";
     return;
   }
-  boxState.textContent = "";
-  listEl.innerHTML = horasData.entradas
-    .slice(0, 8)
-    .map(h => `<li><strong>${h.fecha}</strong> – ${h.actividad || h.descripcion || "—"} <span class="tag">${h.horas ?? h.cantidad} h</span></li>`)
-    .join("");
+  if (boxState) boxState.textContent = "";
+  if (listEl) {
+    listEl.innerHTML = horasData.entradas
+      .slice(0, 8)
+      .map(h => `<li><strong>${h.fecha}</strong> – ${h.actividad || h.descripcion || "—"} <span class="tag">${h.horas ?? h.cantidad} h</span></li>`)
+      .join("");
+  }
   const total = horasData.total_horas ?? horasData.entradas.reduce((a,b)=> a + (+b.horas || +b.cantidad || 0), 0);
-  sumEl.textContent = `Total mostrado: ${total} h · Registros: ${horasData.cantidad_registros ?? horasData.entradas.length}`;
+  if (sumEl) sumEl.textContent = `Total mostrado: ${total} h · Registros: ${horasData.cantidad_registros ?? horasData.entradas.length}`;
 }
 
 async function loadHorasInto(stateSel, listSel, sumSel) {
@@ -106,6 +109,44 @@ async function loadHorasInto(stateSel, listSel, sumSel) {
     boxState.textContent = e?.message || "Error de red.";
     listEl.innerHTML = "";
     sumEl.textContent = "";
+  }
+}
+
+// ---------- comprobantes (opcional listado si existen contenedores) ----------
+function renderComprobantes(stateEl, listEl, items) {
+  if (!listEl || !stateEl) return;
+  if (!items || items.length === 0) {
+    stateEl.textContent = "Sin comprobantes.";
+    listEl.innerHTML = "";
+    return;
+  }
+  stateEl.textContent = "";
+  listEl.innerHTML = items
+    .map(c => {
+      const meta = [
+        c.fecha ? `Fecha: ${c.fecha}` : "",
+        c.concepto ? `Concepto: ${c.concepto}` : "",
+        c.descripcion ? `Desc.: ${c.descripcion}` : "",
+        c.estado ? `Estado: ${c.estado}` : ""
+      ].filter(Boolean).join(" · ");
+      return `<li>
+        <a href="${c.url}" target="_blank" rel="noopener">Archivo</a>
+        ${meta ? `<small> — ${meta}</small>` : ""}
+      </li>`;
+    })
+    .join("");
+}
+
+async function loadComprobantesInto(stateSel, listSel) {
+  const stateEl = $(stateSel), listEl = $(listSel);
+  if (!stateEl || !listEl) return; // si tu HTML no tiene contenedores, no hace nada
+  try {
+    stateEl.textContent = "Cargando…";
+    const j = await getJSON(`${API_COOP_BASE}/api/comprobantes/mios`);
+    renderComprobantes(stateEl, listEl, j.data || []);
+  } catch (err) {
+    stateEl.textContent = err?.message || "No se pudo cargar.";
+    listEl.innerHTML = "";
   }
 }
 
@@ -128,24 +169,21 @@ const Panel = {
     const msg = $("#msgHoras");
     f?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      msg.style.color = "#A0AEC0"; msg.textContent = "Guardando…";
+      if (msg){ msg.style.color = "#A0AEC0"; msg.textContent = "Guardando…"; }
 
       const body = {
-        fecha: $("#fecha").value,
-        cantidad: +$("#cantidad").value,
-        descripcion: $("#descripcion").value || null
+        fecha: $("#fecha")?.value,
+        cantidad: +($("#cantidad")?.value || 0),
+        descripcion: $("#descripcion")?.value || null
       };
 
       try {
-        // requiere POST /api/horas en api-cooperativa
         await postJSON(`${API_COOP_BASE}/api/horas`, body);
-        msg.style.color = "limegreen";
-        msg.textContent = "Horas registradas.";
+        if (msg){ msg.style.color = "limegreen"; msg.textContent = "Horas registradas."; }
         f.reset();
         loadHorasInto("#hoursState", "#hoursList", "#hoursSummary");
       } catch (err) {
-        msg.style.color = "#ff6b6b";
-        msg.textContent = err?.message || "No se pudo guardar.";
+        if (msg){ msg.style.color = "#ff6b6b"; msg.textContent = err?.message || "No se pudo guardar."; }
       }
     });
   },
@@ -155,23 +193,25 @@ const Panel = {
     loadMe().catch(()=>{});
     this.bindLogout();
 
+    // Si tu HTML tiene estos contenedores, se cargan automáticamente.
+    loadComprobantesInto("#compState", "#compList");
+
     const f = $("#formComprobantes");
     const msg = $("#msgComp");
 
     f?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      msg.style.color = "#A0AEC0"; msg.textContent = "Subiendo…";
+      if (msg){ msg.style.color = "#A0AEC0"; msg.textContent = "Subiendo…"; }
 
-      const fd = new FormData(f);
+      const fd = new FormData(f); // debe incluir <input name="archivo" type="file" …>
       try {
-        // requiere POST /api/comprobantes en api-cooperativa
         await postForm(`${API_COOP_BASE}/api/comprobantes`, fd);
-        msg.style.color = "limegreen";
-        msg.textContent = "Comprobante enviado para revisión.";
+        if (msg){ msg.style.color = "limegreen"; msg.textContent = "Comprobante enviado para revisión."; }
         f.reset();
+        // Refresca listado si existe en tu página
+        loadComprobantesInto("#compState", "#compList");
       } catch (err) {
-        msg.style.color = "#ff6b6b";
-        msg.textContent = err?.message || "No se pudo subir.";
+        if (msg){ msg.style.color = "#ff6b6b"; msg.textContent = err?.message || "No se pudo subir."; }
       }
     });
   },
