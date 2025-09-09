@@ -2,10 +2,10 @@
    Usa el token almacenado por login (landing.js)
    Endpoints:
    - api-usuarios      -> /api/me
-   - api-cooperativa   -> /api/horas/mias  (GET)
+   - api-cooperativa   -> /api/v1/horas/mias  (GET)
    - api-cooperativa   -> /api/horas       (POST)
    - api-cooperativa   -> /api/comprobantes (POST)
-   - api-cooperativa   -> /api/comprobantes/mios (GET)
+   - api-cooperativa   -> /api/v1/comprobantes/mios (GET)
 */
 
 const API_USUARIOS_BASE = "http://localhost:8001";
@@ -103,7 +103,7 @@ async function loadHorasInto(stateSel, listSel, sumSel) {
   if (!boxState || !listEl || !sumEl) return;
   try {
     boxState.textContent = "Cargando…";
-    const horas = await getJSON(`${API_COOP_BASE}/api/horas/mias`);
+    const horas = await getJSON(`${API_COOP_BASE}/api/v1/horas/mias`);
     renderHoras(boxState, listEl, sumEl, horas);
   } catch(e) {
     boxState.textContent = e?.message || "Error de red.";
@@ -142,7 +142,7 @@ async function loadComprobantesInto(stateSel, listSel) {
   if (!stateEl || !listEl) return; // si tu HTML no tiene contenedores, no hace nada
   try {
     stateEl.textContent = "Cargando…";
-    const j = await getJSON(`${API_COOP_BASE}/api/comprobantes/mios`);
+    const j = await getJSON(`${API_COOP_BASE}/api/v1/comprobantes/mios`);
     renderComprobantes(stateEl, listEl, j.data || []);
   } catch (err) {
     stateEl.textContent = err?.message || "No se pudo cargar.";
